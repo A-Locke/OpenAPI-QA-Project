@@ -51,25 +51,25 @@ export const RawApifyVideoSchema = z
     desc: z.string().optional(),
     caption: z.string().optional(),
     // Top-level stat fields (older actor versions)
-    diggCount: z.coerce.number().optional(),
-    playCount: z.coerce.number().optional(),
-    commentCount: z.coerce.number().optional(),
-    shareCount: z.coerce.number().optional(),
+    diggCount: z.coerce.number().catch(0).optional(),
+    playCount: z.coerce.number().catch(0).optional(),
+    commentCount: z.coerce.number().catch(0).optional(),
+    shareCount: z.coerce.number().catch(0).optional(),
     // Nested stat objects (newer actor versions)
     statsV2: z
       .object({
-        diggCount: z.coerce.number().optional(),
-        playCount: z.coerce.number().optional(),
-        commentCount: z.coerce.number().optional(),
-        shareCount: z.coerce.number().optional(),
+        diggCount: z.coerce.number().catch(0).optional(),
+        playCount: z.coerce.number().catch(0).optional(),
+        commentCount: z.coerce.number().catch(0).optional(),
+        shareCount: z.coerce.number().catch(0).optional(),
       })
       .optional(),
     stats: z
       .object({
-        diggCount: z.coerce.number().optional(),
-        playCount: z.coerce.number().optional(),
-        commentCount: z.coerce.number().optional(),
-        shareCount: z.coerce.number().optional(),
+        diggCount: z.coerce.number().catch(0).optional(),
+        playCount: z.coerce.number().catch(0).optional(),
+        commentCount: z.coerce.number().catch(0).optional(),
+        shareCount: z.coerce.number().catch(0).optional(),
       })
       .optional(),
     // Author metadata variants
@@ -79,8 +79,8 @@ export const RawApifyVideoSchema = z
         name: z.string().optional(),
         nickName: z.string().optional(),
         nickname: z.string().optional(),
-        fans: z.coerce.number().optional(),
-        followerCount: z.coerce.number().optional(),
+        fans: z.coerce.number().catch(0).optional(),
+        followerCount: z.coerce.number().catch(0).optional(),
         verified: z.boolean().optional(),
       })
       .optional(),
@@ -88,7 +88,7 @@ export const RawApifyVideoSchema = z
       .object({
         uniqueId: z.string().optional(),
         nickname: z.string().optional(),
-        followerCount: z.coerce.number().optional(),
+        followerCount: z.coerce.number().catch(0).optional(),
         verified: z.boolean().optional(),
       })
       .optional(),
@@ -101,7 +101,7 @@ export const RawApifyVideoSchema = z
       .optional(),
     videoUrl: z.string().optional(),
     thumbnailUrl: z.string().optional(),
-    createTime: z.coerce.number().optional(),
+    createTime: z.coerce.number().catch(0).optional(),
     // Hashtag variants
     hashtags: z.array(z.union([z.string(), z.object({ name: z.string().optional() })])).optional(),
     challenges: z.array(z.object({ title: z.string().optional() })).optional(),

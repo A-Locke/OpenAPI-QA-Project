@@ -1,0 +1,26 @@
+{
+  "name": "@specguard/mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server exposing SpecGuard tools — drift detection, contract testing, spec access, and AI analysis",
+  "main": "dist/index.js",
+  "bin": {
+    "specguard-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@specguard/drift-core": "workspace:*",
+    "@specguard/openapi-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4"
+  }
+}

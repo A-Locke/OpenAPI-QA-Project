@@ -28,11 +28,12 @@ jobs:
         # Until then, allow pnpm to resolve and generate it.
         run: pnpm install
 
-      - name: Build packages (shared-types, openapi-utils, drift-core)
+      - name: Build packages (dependency order)
         run: |
           pnpm --filter @specguard/shared-types build
           pnpm --filter @specguard/openapi-utils build
           pnpm --filter @specguard/drift-core build
+          pnpm --filter @specguard/ai-drift-analyzer build
 
       - name: Type-check all workspaces
         run: pnpm -r typecheck

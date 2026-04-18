@@ -8,10 +8,13 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "dev": "docker compose up --build"
+    "dev": "docker compose up --build",
+    "test:contracts": "pnpm --filter @specguard/contract-runner dev -- test --spec ../../spec/internal/openapi.yaml --base-url http://localhost:4000 --upstream-spec ../../spec/upstream/actor-openapi.json --output ../../reports/report.json --fail-on-violation",
+    "test:contracts:ai": "pnpm --filter @specguard/contract-runner dev -- test --spec ../../spec/internal/openapi.yaml --base-url http://localhost:4000 --upstream-spec ../../spec/upstream/actor-openapi.json --output ../../reports/report.json --fail-on-violation --ai-test-gen"
   },
   "devDependencies": {
     "@types/node": "^20.14.14",
+    "tsx": "^4.7.0",
     "typescript": "^5.5.4"
   },
   "engines": {

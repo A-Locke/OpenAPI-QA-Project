@@ -16,6 +16,7 @@ program
   .option('--output <path>', 'Path to write the JSON report', './reports/report.json')
   .option('--timeout <ms>', 'Per-request timeout in milliseconds', '10000')
   .option('--fail-on-violation', 'Exit with code 1 when contract violations are found', false)
+  .option('--ai-test-gen', 'Use Claude to generate additional edge-case tests (requires ANTHROPIC_API_KEY)', false)
   .action(async (opts: {
     spec: string;
     baseUrl: string;
@@ -23,6 +24,7 @@ program
     output: string;
     timeout: string;
     failOnViolation: boolean;
+    aiTestGen: boolean;
   }) => {
     try {
       const report = await run({
@@ -32,6 +34,7 @@ program
         output: opts.output,
         timeoutMs: parseInt(opts.timeout, 10),
         failOnViolation: opts.failOnViolation,
+        aiTestGen: opts.aiTestGen,
       });
 
       const hasViolations = report.summary.contractViolations > 0 ||

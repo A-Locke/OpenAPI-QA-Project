@@ -1,7 +1,9 @@
 import { fetch } from 'undici';
+import { readFile } from 'node:fs/promises';
 import { loadSpec, resolveRefs } from '@specguard/openapi-utils';
 import { detectDrift } from '@specguard/drift-core';
 import { generateTestCases } from './generators/testCases';
+import { generateAiCases } from './generators/aiTestCases';
 import { validateStatusCode, validateResponseBody } from './validator';
 import { buildSummary, writeJsonReport, printSummary } from './reporter';
 import { TestCase, TestResult, RunnerOptions, TestReport, ResultCategory } from './types';
@@ -38,8 +40,26 @@ export async function run(options: RunnerOptions): Promise<TestReport> {
   }
 
   // ── Test generation ────────────────────────────────────────────────────
-  const testCases = generateTestCases(spec);
-  console.log(`Generated ${testCases.length} test cases\n`);
+  const specDrivenCases = generateTestCases(spec);
+  let testCases = specDrivenCases;
+
+  if (options.aiTestGen) {
+    console.log('Generating AI edge-case tests (requires ANTHROPIC_API_KEY)...');
+    try {
+      const specContent = await readFile(options.spec, 'utf-8');
+      const aiCases = await generateAiCases(specContent, driftWarnings);
+      testCases = [...specDrivenCases, ...aiCases];
+      console.log(`  AI generated ${aiCases.length} additional test case(s)`);
+    } catch (err) {
+      console.warn('  AI test generation skipped:', (err as Error).message);
+    }
+  }
+
+  const aiCount = testCases.length - specDrivenCases.length;
+  const label = aiCount > 0
+    ? `${specDrivenCases.length} spec-driven + ${aiCount} AI-generated`
+    : `${specDrivenCases.length} spec-driven`;
+  console.log(`Running ${testCases.length} test cases (${label})\n`);
 
   // ── Test execution ─────────────────────────────────────────────────────
   const results: TestResult[] = [];

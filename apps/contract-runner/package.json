@@ -10,12 +10,13 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@specguard/ai-drift-analyzer": "workspace:*",
     "@specguard/drift-core": "workspace:*",
     "@specguard/openapi-utils": "workspace:*",
     "@specguard/shared-types": "workspace:*",

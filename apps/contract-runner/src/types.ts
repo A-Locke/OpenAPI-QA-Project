@@ -14,6 +14,10 @@ export interface TestCase {
   expectedStatus: number;
   /** The JSON Schema to validate the response body against */
   responseSchema?: Record<string, unknown>;
+  /** Origin of the test case — spec-driven (default) or AI-generated */
+  source?: 'spec-driven' | 'ai-generated';
+  /** One-sentence justification for AI-generated cases */
+  rationale?: string;
 }
 
 export interface TestResult {
@@ -37,6 +41,8 @@ export interface RunnerOptions {
   timeoutMs: number;
   upstreamSpec?: string;
   failOnViolation: boolean;
+  /** When true, call Claude to generate additional edge-case tests. Requires ANTHROPIC_API_KEY. */
+  aiTestGen?: boolean;
 }
 
 export interface ReportSummary {
