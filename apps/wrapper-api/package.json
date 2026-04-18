@@ -1,0 +1,25 @@
+{
+  "name": "@specguard/wrapper-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stable Fastify wrapper API over the Apify TikTok Scraper Actor",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@specguard/shared-types": "workspace:*",
+    "fastify": "^4.28.0",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

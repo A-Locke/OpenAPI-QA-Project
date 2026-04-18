@@ -1,0 +1,22 @@
+{
+  "name": "@specguard/drift-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Detects schema drift between the upstream Apify Actor spec and the internal wrapper contract",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@specguard/openapi-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

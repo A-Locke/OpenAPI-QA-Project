@@ -1,0 +1,350 @@
+openapi: "3.0.1"
+info:
+  title: SpecGuard TikTok Wrapper API
+  description: >
+    Stable, normalized internal contract over the Apify TikTok Scraper Actor
+    (clockworks/tiktok-scraper). Consumers interact only with this spec —
+    not with the upstream actor spec directly. The wrapper shields consumers
+    from upstream schema changes, field renames, and type inconsistencies.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: http://wrapper-api:3000
+    description: Docker Compose internal network
+
+paths:
+  /scrape/tiktok:
+    post:
+      operationId: scrapeTikTok
+      summary: Trigger a TikTok scrape job
+      description: >
+        Initiates an Apify Actor run. Returns a runId you can poll with
+        GET /scrape/results/{runId}. At least one of hashtags, profiles,
+        searchQueries, or postURLs must be provided.
+      tags:
+        - Scrape
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScrapeRequest"
+            examples:
+              byHashtag:
+                summary: Scrape videos by hashtag
+                value:
+                  hashtags: ["trending"]
+                  resultsPerPage: 10
+              byProfile:
+                summary: Scrape a user profile
+                value:
+                  profiles: ["charlidamelio"]
+                  resultsPerPage: 5
+              bySearch:
+                summary: Keyword search
+                value:
+                  searchQueries: ["funny cats"]
+                  resultsPerPage: 20
+              byUrl:
+                summary: Specific video URLs
+                value:
+                  postURLs: ["https://www.tiktok.com/@user/video/7234567890123456789"]
+      responses:
+        "202":
+          description: Scrape job initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScrapeInitResponse"
+        "400":
+          description: Validation error — no input source or invalid field type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream Apify API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Apify API unreachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /scrape/results/{runId}:
+    get:
+      operationId: getScrapeResults
+      summary: Retrieve results for a scrape run
+      description: >
+        Returns the current run status and, once SUCCEEDED, a normalized
+        array of TikTok video items. While still RUNNING, items is empty.
+      tags:
+        - Scrape
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          description: Run ID returned by POST /scrape/tiktok
+          schema:
+            type: string
+            minLength: 1
+          example: "abc123RunId"
+      responses:
+        "200":
+          description: Run status and normalized results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScrapeResultsResponse"
+        "404":
+          description: Run not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Liveness probe
+      tags:
+        - Meta
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+
+components:
+  schemas:
+
+    # ── Request ──────────────────────────────────────────────────────────────
+
+    ScrapeRequest:
+      type: object
+      description: >
+        Input for a TikTok scrape job. Exposes a stable subset of the upstream
+        actor's inputSchema. Advanced upstream fields (profileScrapeSections,
+        profileSorting, downloadSubtitlesOptions, etc.) are intentionally
+        hidden to keep this contract stable.
+      properties:
+        hashtags:
+          type: array
+          description: TikTok hashtags to scrape (without the # symbol)
+          items:
+            type: string
+          example: ["trending", "viral"]
+        profiles:
+          type: array
+          description: TikTok usernames or user IDs
+          items:
+            type: string
+          example: ["charlidamelio"]
+        searchQueries:
+          type: array
+          description: Free-text search keywords
+          items:
+            type: string
+          example: ["funny cats"]
+        postURLs:
+          type: array
+          description: Direct TikTok video URLs
+          items:
+            type: string
+            format: uri
+          example: ["https://www.tiktok.com/@user/video/7234567890123456789"]
+        resultsPerPage:
+          type: integer
+          description: >
+            Max results per input source. Intentionally capped at 100 by this
+            wrapper (upstream allows up to 1,000,000).
+          minimum: 1
+          maximum: 100
+          default: 10
+
+    # ── Responses ─────────────────────────────────────────────────────────────
+
+    ScrapeInitResponse:
+      type: object
+      required:
+        - runId
+        - status
+        - startedAt
+      properties:
+        runId:
+          type: string
+          description: Unique Apify run identifier — use this to poll for results
+          example: "abc123RunId"
+        status:
+          type: string
+          description: Initial run status
+          enum:
+            - READY
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - TIMED-OUT
+            - ABORTED
+          example: "READY"
+        startedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the run was initiated
+          example: "2025-01-08T00:00:00.000Z"
+
+    ScrapeResultsResponse:
+      type: object
+      required:
+        - runId
+        - status
+        - items
+      properties:
+        runId:
+          type: string
+          example: "abc123RunId"
+        status:
+          type: string
+          enum:
+            - READY
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - TIMED-OUT
+            - ABORTED
+          example: "SUCCEEDED"
+        items:
+          type: array
+          description: Normalized TikTok video results (empty while RUNNING)
+          items:
+            $ref: "#/components/schemas/TikTokVideo"
+
+    TikTokVideo:
+      type: object
+      description: >
+        Normalized video record. Field names are stable regardless of upstream
+        actor changes (e.g. diggCount → likes, playCount → views).
+      required:
+        - id
+        - caption
+        - likes
+        - views
+        - comments
+        - shares
+        - author
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: TikTok video ID
+          example: "7234567890123456789"
+        caption:
+          type: string
+          description: Video caption / description text
+          example: "Check out this #trending video!"
+        likes:
+          type: integer
+          minimum: 0
+          description: Like count (normalized from upstream diggCount / statsV2.diggCount)
+          example: 150000
+        views:
+          type: integer
+          minimum: 0
+          description: View count (normalized from upstream playCount / statsV2.playCount)
+          example: 2500000
+        comments:
+          type: integer
+          minimum: 0
+          description: Comment count
+          example: 3200
+        shares:
+          type: integer
+          minimum: 0
+          description: Share count
+          example: 8500
+        author:
+          $ref: "#/components/schemas/TikTokAuthor"
+        videoUrl:
+          type: string
+          description: Streaming URL for the video file
+          example: "https://v19-webapp.tiktok.com/video/tos/example.mp4"
+        thumbnailUrl:
+          type: string
+          description: Cover / thumbnail image URL
+          example: "https://p16-sign.tiktokcdn.com/example.jpeg"
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 post timestamp (normalized from upstream Unix createTime)
+          example: "2025-01-05T12:30:00.000Z"
+        hashtags:
+          type: array
+          description: Hashtags extracted from the caption / challenges list
+          items:
+            type: string
+          example: ["trending", "viral", "fyp"]
+
+    TikTokAuthor:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          description: Unique TikTok handle (normalized from upstream uniqueId)
+          example: "charlidamelio"
+        displayName:
+          type: string
+          description: Display name / nickname
+          example: "Charli D'Amelio"
+        followers:
+          type: integer
+          minimum: 0
+          description: Follower count (normalized from upstream fans / followerCount)
+          example: 150000000
+        verified:
+          type: boolean
+          description: Whether the account is verified
+          example: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable description
+          example: "At least one input source must be provided"
+        details:
+          type: object
+          description: Optional additional context
+          additionalProperties: true

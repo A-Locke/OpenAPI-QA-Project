@@ -1,0 +1,32 @@
+{
+  "name": "@specguard/contract-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CLI contract test runner — validates wrapper API responses against the internal OpenAPI spec",
+  "main": "dist/index.js",
+  "bin": {
+    "specguard": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@specguard/drift-core": "workspace:*",
+    "@specguard/openapi-utils": "workspace:*",
+    "@specguard/shared-types": "workspace:*",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "commander": "^12.1.0",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

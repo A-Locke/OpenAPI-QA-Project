@@ -1,0 +1,21 @@
+{
+  "name": "specguard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SpecGuard – OpenAPI Contract Testing Platform for TikTok Apify Actor",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "dev": "docker compose up --build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}

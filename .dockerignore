@@ -1,0 +1,17 @@
+# Local build artifacts — Docker builds its own inside the container
+node_modules
+**/node_modules
+dist
+**/dist
+
+# Secrets and environment files
+.env
+*.env.local
+
+# Test reports generated locally
+reports/
+
+# Editor and OS noise
+.git
+.DS_Store
+*.log

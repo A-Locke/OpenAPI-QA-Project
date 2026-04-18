@@ -1,0 +1,790 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "TikTok Scraper",
+    "description": "Extract data from TikTok videos, hashtags, and users. Use URLs or search queries to scrape TikTok profiles, hashtags, posts, URLs, shares, followers, hearts, names, video, and music-related data. Export scraped data, run the scraper via API, schedule and monitor runs or integrate with other tools.",
+    "version": "0.0",
+    "x-build-id": "ImZA4G61jtFlls59t"
+  },
+  "servers": [
+    {
+      "url": "https://api.apify.com/v2"
+    }
+  ],
+  "paths": {
+    "/acts/clockworks~tiktok-scraper/run-sync-get-dataset-items": {
+      "post": {
+        "operationId": "run-sync-get-dataset-items-clockworks-tiktok-scraper",
+        "x-openai-isConsequential": false,
+        "summary": "Executes an Actor, waits for its completion, and returns Actor's dataset items in response.",
+        "tags": [
+          "Run Actor"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/inputSchema"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Enter your Apify token here"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/acts/clockworks~tiktok-scraper/runs": {
+      "post": {
+        "operationId": "runs-sync-clockworks-tiktok-scraper",
+        "x-openai-isConsequential": false,
+        "summary": "Executes an Actor and returns information about the initiated run in response.",
+        "tags": [
+          "Run Actor"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/inputSchema"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Enter your Apify token here"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runsResponseSchema"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/acts/clockworks~tiktok-scraper/run-sync": {
+      "post": {
+        "operationId": "run-sync-clockworks-tiktok-scraper",
+        "x-openai-isConsequential": false,
+        "summary": "Executes an Actor, waits for completion, and returns the OUTPUT from Key-value store in response.",
+        "tags": [
+          "Run Actor"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/inputSchema"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Enter your Apify token here"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hashtags": {
+            "title": "#️⃣ Videos with this hashtag",
+            "type": "array",
+            "description": "Just add one or more TikTok hashtags and the scraper will collect data about videos containing this hashtag: likes, users, followers and more. <br> You can enter the hashtags one by one, or use the <strong>Bulk edit</strong> section to add a prepared list.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resultsPerPage": {
+            "title": "💯 Number of videos per hashtag, profile or search",
+            "minimum": 1,
+            "maximum": 1000000,
+            "type": "integer",
+            "description": "Add the number of tiktoks you want to scrape per hashtag, profile, or search query. This field is applicable to <strong>#️⃣ Hashtags</strong>, <strong>😎 Profiles</strong>, and <strong>🔍 Search</strong>.",
+            "default": 1
+          },
+          "profiles": {
+            "title": "Usernames",
+            "type": "array",
+            "description": "Add one or multiple TikTok usernames or user IDs you want to scrape. You can enter the usernames one by one, or use the <strong>Bulk edit</strong> section to add a prepared list.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "profileScrapeSections": {
+            "title": "Profile sections to scrape",
+            "minItems": 1,
+            "uniqueItems": true,
+            "type": "array",
+            "description": "If a profile has reposted videos, you can scrape them by selecting 'Reposts'",
+            "items": {
+              "type": "string",
+              "enum": [
+                "videos",
+                "reposts"
+              ],
+              "enumTitles": [
+                "Videos",
+                "Reposts"
+              ]
+            },
+            "default": [
+              "videos"
+            ]
+          },
+          "profileSorting": {
+            "title": "Profile video sorting",
+            "enum": [
+              "latest",
+              "popular",
+              "oldest"
+            ],
+            "type": "string",
+            "description": "Select Latest to scrape the most recent videos first, Oldest - the oldest videos first, Popular - the most popular videos first. Date filters only work with Latest and Oldest. Only supported for Videos section",
+            "default": "latest"
+          },
+          "excludePinnedPosts": {
+            "title": "Exclude pinned posts",
+            "type": "boolean",
+            "description": "Tick to exclude pinned posts from profiles. Pinned posts are usually the first videos on a profile's page.",
+            "default": false
+          },
+          "oldestPostDateUnified": {
+            "title": "📅 Date filter - scrape profile videos published after [date] ($)",
+            "pattern": "^(\\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])(T[0-2]\\d:[0-5]\\d(:[0-5]\\d)?(\\.\\d+)?Z?)?$|^(\\d+)\\s*(minute|hour|day|week|month|year)s?$",
+            "type": "string",
+            "description": "Optional charged filter. Only videos uploaded after or on this date will be scraped. Alternatively, specify how old the scraped videos should be in days. Putting <code>1</code> will get you only today's posts, <code>2</code> - yesterday's and today's, and so on."
+          },
+          "newestPostDate": {
+            "title": "📅 Date filter - scrape profile videos published before [date] ($)",
+            "type": "string",
+            "description": "Optional charged filter. Only videos uploaded before or on this date will be scraped."
+          },
+          "mostDiggs": {
+            "title": "⭐ Popularity filter - scrape videos with number of hearts < [number] ($)",
+            "minimum": 1,
+            "type": "integer",
+            "description": "Optional charged filter. Scrapes only videos with less hearts than the number you add. Doesn't work with date filters"
+          },
+          "leastDiggs": {
+            "title": "⭐ Popularity filter - scrape videos with number of hearts ≥ [number] ($)",
+            "minimum": 1,
+            "type": "integer",
+            "description": "Optional charged filter. Scrapes only videos with no less hearts than the number you add. Doesn't work with date filters"
+          },
+          "maxFollowersPerProfile": {
+            "title": "🗂️ Maximum number of followers profiles ($)",
+            "minimum": 0,
+            "type": "integer",
+            "description": "Scrapes number of 'Followers' profiles requested from the inputted profiles. You can find the link to the dataset under the followDatasetUrl field in the output. If you want to scrape only Followers/Following profiles, go to our TikTok Followers Scraper."
+          },
+          "maxFollowingPerProfile": {
+            "title": "🗂️ Maximum number of following profiles ($)",
+            "minimum": 0,
+            "type": "integer",
+            "description": "Scrapes number of 'Following' profiles requested from the inputted profiles. You can find the link to the dataset under the followDatasetUrl field in the output. If you want to scrape only Followers/Following profiles, go to our TikTok Followers Scraper."
+          },
+          "searchQueries": {
+            "title": "Search queries",
+            "type": "array",
+            "description": "Your keyword will apply to both videos <strong>and</strong> profiles. Use the <strong>Search sorting</strong> field below to specify whether you want your search to apply to top content, videos or users. <br> As for your query's format, you can use any query that works on TikTok.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "searchSection": {
+            "title": "Top/Video/Profile section",
+            "enum": [
+              "",
+              "/video",
+              "/user"
+            ],
+            "type": "string",
+            "description": "By default, this scraper will sort the search results by whatever shows up in the <strong>Top</strong> section of TikTok search. <br> But you can narrow it down: if you want to apply your search query to just videos, use <strong>Video</strong>, just profiles - <strong>Profile</strong>.",
+            "default": ""
+          },
+          "maxProfilesPerQuery": {
+            "title": "Number of profiles per query",
+            "minimum": 1,
+            "type": "integer",
+            "description": "Only applies to profile searches. In this case ignore the <strong> 💯 Number of videos </strong> section and choose the number of profiles you want to scrape here.",
+            "default": 10
+          },
+          "searchSorting": {
+            "title": "🎯 Search sorting ($)",
+            "enum": [
+              "0",
+              "1",
+              "3"
+            ],
+            "type": "string",
+            "description": "Optional charged filter. Select how you want the search results to be sorted when searching for videos. Only valid with `/video` search section.",
+            "default": "0"
+          },
+          "searchDatePosted": {
+            "title": "📅 Search date filter ($)",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "type": "string",
+            "description": "Optional charged filter. Select a date range in which to search for videos. Only valid with `/video` search section.",
+            "default": "0"
+          },
+          "postURLs": {
+            "title": "Direct URLs for scraping specific tiktoks",
+            "type": "array",
+            "description": "Add the URLs of tiktok videos you want to scrape. You can paste video URLs one by one, or use the <strong>Bulk edit</strong> section to add a prepared list.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scrapeRelatedVideos": {
+            "title": "Scrape related videos",
+            "type": "boolean",
+            "description": "Tick to scrape related videos for the post URLs you provide.\n- The maximum number of scraped related videos is set by the `resultsPerPage` count.\n- Note that this only works for direct video URLs from the `postURLs` field.",
+            "default": false
+          },
+          "shouldDownloadVideos": {
+            "title": "⬇️ Add-on: video download ($)",
+            "type": "boolean",
+            "description": "This is a charged add-on. Tick to download TikTok videos.",
+            "default": false
+          },
+          "shouldDownloadCovers": {
+            "title": "Include thumbnails",
+            "type": "boolean",
+            "description": "Tick to download TikTok video cover images (thumbnails).",
+            "default": false
+          },
+          "shouldDownloadSlideshowImages": {
+            "title": "Download slideshow images",
+            "type": "boolean",
+            "description": "Tick to download TikTok slideshow images.",
+            "default": false
+          },
+          "shouldDownloadAvatars": {
+            "title": "Include profile avatars",
+            "type": "boolean",
+            "description": "Tick to download authors' profile pictures.",
+            "default": false
+          },
+          "shouldDownloadMusicCovers": {
+            "title": "Include sound covers",
+            "type": "boolean",
+            "description": "Tick to download cover images of sounds used in posts.",
+            "default": false
+          },
+          "videoKvStoreIdOrName": {
+            "title": "✍️ Name your storage for videos. Unnamed key-value stores will be deleted after 7 days (or longer on paid plans)",
+            "pattern": "^[a-zA-Z0-9-]+$",
+            "type": "string",
+            "description": "Name (or ID) of the Key Value Store where the videos and other media like thumbnails will be stored. Omit to store in the default one. Using this option will provide a named Key-Value store can help bypass data retention and store the content forever until the store is manually deleted.<br><br>The Key-Value store's name can consist of a versatile combination of uppercase letters, lowercase letters, digits, or hyphens, all without any spaces."
+          },
+          "downloadSubtitlesOptions": {
+            "title": "Subtitles & Transcription",
+            "enum": [
+              "NEVER_DOWNLOAD_SUBTITLES",
+              "DOWNLOAD_SUBTITLES",
+              "DOWNLOAD_AND_TRANSCRIBE_VIDEOS_WITHOUT_SUBTITLES",
+              "TRANSCRIBE_ALL_VIDEOS"
+            ],
+            "type": "string",
+            "description": "Choose how to handle subtitles and audio transcription for input videos. Subtitles are provided by TikTok for some videos, and transcription means that this Actor will use speech-to-text AI to generate video transcript. Transcripts are charged as an extra event according to your plan.",
+            "default": "NEVER_DOWNLOAD_SUBTITLES"
+          },
+          "commentsPerPost": {
+            "title": "Maximum comments per post",
+            "minimum": 0,
+            "type": "integer",
+            "description": "The number of comments extracted from every result. Due to TikTok API limitations, the actual number of scraped comments may differ, especially for posts with thousands of comments. The link to the dataset will be under a field commentsDatasetURL in the output."
+          },
+          "topLevelCommentsPerPost": {
+            "title": "Maximum top-level comments per post",
+            "minimum": 0,
+            "type": "integer",
+            "description": "The maximum number of top-level (non-reply) comments you want from a single post."
+          },
+          "maxRepliesPerComment": {
+            "title": "Maximum replies per comment",
+            "minimum": 0,
+            "type": "integer",
+            "description": "The maximum number of replies you want from a single comment. \n\nNote: Successful extraction of all desired replies is currently not guaranteed."
+          },
+          "proxyCountryCode": {
+            "title": "Proxy country",
+            "enum": [
+              "None",
+              "AF",
+              "AL",
+              "DZ",
+              "AS",
+              "AD",
+              "AO",
+              "AI",
+              "AG",
+              "AR",
+              "AM",
+              "AU",
+              "AT",
+              "AZ",
+              "BS",
+              "BH",
+              "BD",
+              "BB",
+              "BY",
+              "BE",
+              "BZ",
+              "BJ",
+              "BM",
+              "BT",
+              "BO",
+              "BA",
+              "BW",
+              "BR",
+              "VG",
+              "BN",
+              "BG",
+              "BF",
+              "BI",
+              "KH",
+              "CM",
+              "CA",
+              "CV",
+              "KY",
+              "TD",
+              "CL",
+              "CO",
+              "CK",
+              "CR",
+              "HR",
+              "CY",
+              "CZ",
+              "CD",
+              "DK",
+              "DJ",
+              "DO",
+              "EC",
+              "EG",
+              "SV",
+              "EE",
+              "ET",
+              "FK",
+              "FJ",
+              "FI",
+              "FR",
+              "PF",
+              "GA",
+              "GE",
+              "DE",
+              "GH",
+              "GI",
+              "GR",
+              "GL",
+              "GD",
+              "GP",
+              "GT",
+              "GN",
+              "GW",
+              "GY",
+              "HN",
+              "HK",
+              "HU",
+              "IS",
+              "IN",
+              "ID",
+              "IQ",
+              "IE",
+              "IM",
+              "IL",
+              "IT",
+              "CI",
+              "JM",
+              "JP",
+              "JE",
+              "KZ",
+              "KE",
+              "XK",
+              "KW",
+              "LA",
+              "LV",
+              "LB",
+              "LS",
+              "LR",
+              "LY",
+              "LT",
+              "LU",
+              "MO",
+              "MG",
+              "MW",
+              "MY",
+              "MV",
+              "ML",
+              "MT",
+              "MH",
+              "MQ",
+              "MR",
+              "MU",
+              "MX",
+              "MD",
+              "MC",
+              "MN",
+              "ME",
+              "MA",
+              "MZ",
+              "MM",
+              "NA",
+              "NR",
+              "NP",
+              "NL",
+              "NZ",
+              "NI",
+              "NG",
+              "MK",
+              "NO",
+              "OM",
+              "PK",
+              "PS",
+              "PA",
+              "PG",
+              "PY",
+              "PE",
+              "PH",
+              "PL",
+              "PT",
+              "PR",
+              "QA",
+              "CG",
+              "RO",
+              "RU",
+              "RW",
+              "RE",
+              "KN",
+              "LC",
+              "MF",
+              "PM",
+              "VC",
+              "SM",
+              "SA",
+              "SN",
+              "RS",
+              "SL",
+              "SG",
+              "SX",
+              "SK",
+              "SB",
+              "SO",
+              "ZA",
+              "KR",
+              "ES",
+              "LK",
+              "SR",
+              "SZ",
+              "SE",
+              "CH",
+              "TW",
+              "TJ",
+              "TZ",
+              "TH",
+              "TG",
+              "TO",
+              "TT",
+              "TN",
+              "TR",
+              "TM",
+              "TC",
+              "TV",
+              "VI",
+              "UG",
+              "UA",
+              "AE",
+              "GB",
+              "US",
+              "UY",
+              "VE",
+              "VN",
+              "WF",
+              "YE",
+              "ZM",
+              "ZW",
+              "AX"
+            ],
+            "type": "string",
+            "description": "Country to use with proxy. Use it in case you want to scrape posts only available for some country.",
+            "default": "None"
+          }
+        }
+      },
+      "runsResponseSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "actId": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string"
+              },
+              "startedAt": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2025-01-08T00:00:00.000Z"
+              },
+              "finishedAt": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2025-01-08T00:00:00.000Z"
+              },
+              "status": {
+                "type": "string",
+                "example": "READY"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "origin": {
+                    "type": "string",
+                    "example": "API"
+                  },
+                  "userAgent": {
+                    "type": "string"
+                  }
+                }
+              },
+              "stats": {
+                "type": "object",
+                "properties": {
+                  "inputBodyLen": {
+                    "type": "integer",
+                    "example": 2000
+                  },
+                  "rebootCount": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "restartCount": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "resurrectCount": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "computeUnits": {
+                    "type": "integer",
+                    "example": 0
+                  }
+                }
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "build": {
+                    "type": "string",
+                    "example": "latest"
+                  },
+                  "timeoutSecs": {
+                    "type": "integer",
+                    "example": 300
+                  },
+                  "memoryMbytes": {
+                    "type": "integer",
+                    "example": 1024
+                  },
+                  "diskMbytes": {
+                    "type": "integer",
+                    "example": 2048
+                  }
+                }
+              },
+              "buildId": {
+                "type": "string"
+              },
+              "defaultKeyValueStoreId": {
+                "type": "string"
+              },
+              "defaultDatasetId": {
+                "type": "string"
+              },
+              "defaultRequestQueueId": {
+                "type": "string"
+              },
+              "buildNumber": {
+                "type": "string",
+                "example": "1.0.0"
+              },
+              "containerUrl": {
+                "type": "string"
+              },
+              "usage": {
+                "type": "object",
+                "properties": {
+                  "ACTOR_COMPUTE_UNITS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATASET_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATASET_WRITES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "KEY_VALUE_STORE_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "KEY_VALUE_STORE_WRITES": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "KEY_VALUE_STORE_LISTS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "REQUEST_QUEUE_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "REQUEST_QUEUE_WRITES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATA_TRANSFER_INTERNAL_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATA_TRANSFER_EXTERNAL_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "PROXY_RESIDENTIAL_TRANSFER_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "PROXY_SERPS": {
+                    "type": "integer",
+                    "example": 0
+                  }
+                }
+              },
+              "usageTotalUsd": {
+                "type": "number",
+                "example": 0.00005
+              },
+              "usageUsd": {
+                "type": "object",
+                "properties": {
+                  "ACTOR_COMPUTE_UNITS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATASET_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATASET_WRITES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "KEY_VALUE_STORE_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "KEY_VALUE_STORE_WRITES": {
+                    "type": "number",
+                    "example": 0.00005
+                  },
+                  "KEY_VALUE_STORE_LISTS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "REQUEST_QUEUE_READS": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "REQUEST_QUEUE_WRITES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATA_TRANSFER_INTERNAL_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "DATA_TRANSFER_EXTERNAL_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "PROXY_RESIDENTIAL_TRANSFER_GBYTES": {
+                    "type": "integer",
+                    "example": 0
+                  },
+                  "PROXY_SERPS": {
+                    "type": "integer",
+                    "example": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

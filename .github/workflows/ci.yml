@@ -1,0 +1,79 @@
+name: SpecGuard CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Type-check + Unit Tests ─────────────────────────────────────────────────
+  test:
+    name: Type-check & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        # Use --frozen-lockfile once pnpm-lock.yaml is committed to the repo.
+        # Until then, allow pnpm to resolve and generate it.
+        run: pnpm install
+
+      - name: Build packages (shared-types, openapi-utils, drift-core)
+        run: |
+          pnpm --filter @specguard/shared-types build
+          pnpm --filter @specguard/openapi-utils build
+          pnpm --filter @specguard/drift-core build
+
+      - name: Type-check all workspaces
+        run: pnpm -r typecheck
+
+      - name: Run unit tests
+        run: pnpm -r test
+
+  # ── Docker Build + Contract Validation ──────────────────────────────────────
+  contract:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Run contract tests
+        run: |
+          docker compose run --rm contract-runner \
+            test \
+            --spec /spec/internal/openapi.yaml \
+            --base-url http://mock-server:4000 \
+            --upstream-spec /spec/upstream/actor-openapi.json \
+            --output /reports/report.json \
+            --fail-on-violation
+        # Upstream drift warnings do NOT fail CI by default.
+        # Only contract violations cause a non-zero exit.
+
+      - name: Upload contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-report
+          path: reports/report.json
+          retention-days: 30
+
+      - name: Tear down
+        if: always()
+        run: docker compose down

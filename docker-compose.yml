@@ -1,0 +1,79 @@
+services:
+
+  # ── Mock Server ─────────────────────────────────────────────────────────────
+  # Deterministic Fastify server that simulates valid, drifted, and invalid
+  # responses for the wrapper API endpoints. Contract tests run against this.
+  mock-server:
+    build:
+      context: .
+      dockerfile: apps/mock-server/Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+      LOG_LEVEL: "info"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').request({hostname:'localhost',port:4000,path:'/health'},r=>r.statusCode===200?process.exit(0):process.exit(1)).on('error',()=>process.exit(1)).end()"
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+
+  # ── Wrapper API ─────────────────────────────────────────────────────────────
+  # The stable Fastify wrapper over the Apify TikTok Scraper Actor.
+  # Requires APIFY_TOKEN to call real Apify — omit for mock-only runs.
+  wrapper-api:
+    build:
+      context: .
+      dockerfile: apps/wrapper-api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      LOG_LEVEL: "info"
+      APIFY_TOKEN: "${APIFY_TOKEN:-}"
+      APIFY_ACTOR_ID: "${APIFY_ACTOR_ID:-clockworks~tiktok-scraper}"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').request({hostname:'localhost',port:3000,path:'/health'},r=>r.statusCode===200?process.exit(0):process.exit(1)).on('error',()=>process.exit(1)).end()"
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+
+  # ── Contract Runner ─────────────────────────────────────────────────────────
+  # Runs contract tests against the mock-server using the internal OpenAPI spec.
+  # Also performs upstream drift detection against the actor spec.
+  # Exits 0 on success, 1 on contract violations (--fail-on-violation).
+  contract-runner:
+    build:
+      context: .
+      dockerfile: apps/contract-runner/Dockerfile
+    depends_on:
+      mock-server:
+        condition: service_healthy
+    volumes:
+      - ./spec:/spec:ro
+      - ./reports:/reports
+    environment:
+      BASE_URL: "http://mock-server:4000"
+      SPEC_PATH: "/spec/internal/openapi.yaml"
+      UPSTREAM_SPEC_PATH: "/spec/upstream/actor-openapi.json"
+    command:
+      - test
+      - --spec
+      - /spec/internal/openapi.yaml
+      - --base-url
+      - http://mock-server:4000
+      - --upstream-spec
+      - /spec/upstream/actor-openapi.json
+      - --output
+      - /reports/report.json
+      - --fail-on-violation

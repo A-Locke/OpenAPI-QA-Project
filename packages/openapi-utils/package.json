@@ -1,0 +1,23 @@
+{
+  "name": "@specguard/openapi-utils",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenAPI spec loading, $ref resolution, and schema extraction utilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.14.14",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
