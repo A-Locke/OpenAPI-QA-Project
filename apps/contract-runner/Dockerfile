@@ -9,12 +9,14 @@ COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY packages/shared-types/ ./packages/shared-types/
 COPY packages/openapi-utils/ ./packages/openapi-utils/
 COPY packages/drift-core/ ./packages/drift-core/
+COPY packages/ai-drift-analyzer/ ./packages/ai-drift-analyzer/
 COPY apps/contract-runner/ ./apps/contract-runner/
 
 RUN pnpm install
 RUN pnpm --filter @specguard/shared-types build
 RUN pnpm --filter @specguard/openapi-utils build
 RUN pnpm --filter @specguard/drift-core build
+RUN pnpm --filter @specguard/ai-drift-analyzer build
 RUN pnpm --filter @specguard/contract-runner build
 
 # Bundle app + all resolved production deps into a self-contained directory.
