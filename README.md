@@ -1,4 +1,4 @@
-# SpecGuard — OpenAPI Contract Testing Platform
+# OpenAPI Contract Testing Platform
 
 A production-grade TypeScript monorepo that wraps the [Apify TikTok Scraper Actor](https://apify.com/clockworks/tiktok-scraper) behind a stable, versioned internal API contract — then continuously validates that contract and detects schema drift from the upstream actor spec.
 
@@ -73,7 +73,7 @@ packages/
   openapi-utils/    Spec loading, $ref resolution, schema extraction
   drift-core/       Upstream vs internal spec comparison engine (structural)
   ai-drift-analyzer/ Semantic drift analysis + AI edge-case test generation (Claude)
-  mcp-server/       MCP server — exposes SpecGuard tools to any MCP-compatible host
+  mcp-server/       MCP server — exposes tools to any MCP-compatible host
 spec/
   upstream/         actor-openapi.json  (Apify actor spec — read-only)
   internal/         openapi.yaml        (internal wrapper contract)
@@ -397,7 +397,7 @@ Each AI-generated `TestCase` carries a `source: "ai-generated"` tag and a `ratio
 
 ## MCP Server
 
-`packages/mcp-server` exposes all SpecGuard tooling as an [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server over stdio. Any MCP-compatible host — Claude Desktop, Claude Code, or a custom agent — can call these tools directly.
+`packages/mcp-server` exposes all tooling as an [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server over stdio. Any MCP-compatible host — Claude Desktop, Claude Code, or a custom agent — can call these tools directly.
 
 | Tool | Description |
 |---|---|
